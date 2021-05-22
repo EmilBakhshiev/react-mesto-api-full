@@ -29,28 +29,30 @@ function App() {
   const history = useHistory();
 
   useEffect(() => {
-    api
-      .getProfileInfo()
-      .then((res) => {
-        setCurrentUser(res);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    if (loggedIn) {
+      api
+        .getProfileInfo()
+        .then((res) => {
+          setCurrentUser(res);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
 
-    api
-      .getInitialCards()
-      .then((data) => {
-        setCards(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+      api
+        .getInitialCards()
+        .then((data) => {
+          setCards(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
   }, [loggedIn]);
 
   useEffect(() => {
-    let jwt = localStorage.getItem('jwt');
-    if (jwt) {
+    if (localStorage.getItem('jwt')) {
+      let jwt = localStorage.getItem('jwt');
       auth
         .checkToken(jwt)
         .then((res) => {
@@ -181,6 +183,7 @@ function App() {
 
   function onSignOut() {
     localStorage.removeItem('jwt');
+    setCurrentUser('');
     setLoggedIn(false);
     history.push('/sign-in');
   }
