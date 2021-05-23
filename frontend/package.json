@@ -16,7 +16,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "deploy": "npm run build && scp -r ./build/* hattori_hanzo@178.154.204.254:/home/hattori_hanzo/express-mesto/frontend",
+    "deploy": "npm run build && scp -r ./build/* hattori_hanzo@178.154.204.254:/home/hattori_hanzo/react-mesto-api-full/frontend",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
