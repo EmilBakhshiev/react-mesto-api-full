@@ -11,16 +11,10 @@ dotenv.config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => {
-      if (users.length >= 1) {
-        res.send(users);
-      } else {
-        throw new NotFoundError('Пользователи не найдены');
-      }
-    })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка сервера' }));
+    .then((users) => res.status(200).send(users))
+    .catch(next);
 };
 
 const getMyUser = (req, res, next) => {
@@ -69,8 +63,7 @@ const createUser = (req, res, next) => {
           about: user.about,
           avatar: user.avatar,
           email: user.email,
-        })
-      )
+        }))
       .catch((err) => {
         if (err.name === 'MongoError' || err.code === 11000) {
           throw new DuplicateError('Пользователь с таким email уже существует');
@@ -93,7 +86,7 @@ const updateProfile = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .orFail(new Error('Нет пользователя с таким Id'))
     .then((data) => res.send(data))
@@ -117,7 +110,7 @@ const updateAvatar = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .orFail(new Error('Нет пользователя с таким id'))
     .then((data) => res.send(data))
@@ -134,9 +127,13 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, `${NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret'}`, {
-        expiresIn: '7d',
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        `${NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret'}`,
+        {
+          expiresIn: '7d',
+        },
+      );
       res.send({ token });
     })
     .catch((err) => {

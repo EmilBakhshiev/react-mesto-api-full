@@ -3,16 +3,10 @@ const ValidationError = require('../errors/ValidationError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => {
-      if (cards.length >= 1) {
-        res.send(cards);
-      } else {
-        res.status(404).send({ message: 'Карточки не найдены' });
-      }
-    })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .then((cards) => res.status(200).send(cards))
+    .catch(next);
 };
 
 const createCard = (req, res, next) => {
@@ -34,7 +28,7 @@ const deleteCard = (req, res, next) => {
     .then((card) => {
       if (card.owner.toString() !== userId) {
         throw new ForbiddenError(
-          'Действие недоступно. Вы не являетесь владельцем карточки'
+          'Действие недоступно. Вы не являетесь владельцем карточки',
         );
       }
       Card.findByIdAndDelete(req.params.cardId)
@@ -51,7 +45,7 @@ const likeCards = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .orFail(new Error('Карточки с таким id не существует'))
     .then((likeCard) => res.send(likeCard))
@@ -68,7 +62,7 @@ const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .orFail(new Error('Карточки с таким id не существует'))
     .then((card) => res.send(card))
