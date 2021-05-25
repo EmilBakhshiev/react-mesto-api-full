@@ -23,11 +23,13 @@ const getMyUser = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Id неверный');
+        next(new ValidationError('Id не верный'));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 const getUserById = (req, res, next) => {
@@ -36,15 +38,19 @@ const getUserById = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Id неверный');
+        next(new ValidationError('Id не верный'));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   if (!email || !password) {
     throw new AuthError('Пароль или почта некорректны');
   }
@@ -56,22 +62,22 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     })
-      .then((user) =>
-        res.status(200).send({
-          _id: user._id,
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email: user.email,
-        }))
+      .then((user) => res.status(200).send({
+        _id: user._id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      }))
       .catch((err) => {
         if (err.name === 'MongoError' || err.code === 11000) {
-          throw new DuplicateError('Пользователь с таким email уже существует');
+          next(new DuplicateError('Пользователь с таким email уже существует'));
         } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-          throw new ValidationError('Пароль или почта некорректны');
+          next(new ValidationError('Пароль или почта некорректны'));
+        } else {
+          next(err);
         }
-      })
-      .catch(next);
+      });
   });
 };
 
@@ -92,11 +98,13 @@ const updateProfile = (req, res, next) => {
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        throw new ValidationError('Введенные данные некорректны');
+        next(new ValidationError('Введенные данные некорректны'));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -116,11 +124,13 @@ const updateAvatar = (req, res, next) => {
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 const login = (req, res, next) => {

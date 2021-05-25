@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 const dotenv = require('dotenv');
+const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRouter = require('./routes/users');
@@ -49,6 +50,7 @@ app.all('*', () => {
   throw new NotFoundError('Такой страницы не существует');
 });
 
+app.use(errors());
 app.use(errorLogger);
 app.use(errorHandler);
 

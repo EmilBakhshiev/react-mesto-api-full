@@ -16,9 +16,12 @@ const createCard = (req, res, next) => {
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
     .catch((err) => {
-      throw new ValidationError('Неверные данные');
-    })
-    .catch(next);
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Неверные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const deleteCard = (req, res, next) => {
@@ -36,9 +39,12 @@ const deleteCard = (req, res, next) => {
         .catch(next);
     })
     .catch((err) => {
-      throw new ValidationError(err.message);
-    })
-    .catch(next);
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Неверные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const likeCards = (req, res, next) => {
@@ -51,11 +57,13 @@ const likeCards = (req, res, next) => {
     .then((likeCard) => res.send(likeCard))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Id неверный');
+        next(new ValidationError('Id неверный'));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 const dislikeCard = (req, res, next) => {
@@ -68,11 +76,13 @@ const dislikeCard = (req, res, next) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Id неверный');
+        next(new ValidationError('Id неверный'));
+      } else if (err.message === 'NotFound') {
+        next(new NotFoundError(err.message));
+      } else {
+        next(err);
       }
-      throw new NotFoundError(err.message);
-    })
-    .catch(next);
+    });
 };
 
 module.exports = {
