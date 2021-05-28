@@ -27,7 +27,7 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const userId = req.user._id;
   Card.findById(req.params.cardId)
-    .orFail(new Error('Карточки не существует'))
+    .orFail(() => {throw new NotFoundError('NotFound')})
     .then((card) => {
       if (card.owner.toString() !== userId) {
         throw new ForbiddenError(
@@ -41,6 +41,8 @@ const deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Неверные данные'));
+      } else if (err.statusCode === 404) {
+        next(new NotFoundError('Карточки не существует'));
       } else {
         next(err);
       }
@@ -53,13 +55,11 @@ const likeCards = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
-    .orFail(new Error('Карточки с таким id не существует'))
+    .orFail(() => {throw new NotFoundError('Карточки с таким id не существует')})
     .then((likeCard) => res.send(likeCard))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Id неверный'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }
@@ -72,13 +72,11 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
-    .orFail(new Error('Карточки с таким id не существует'))
+    .orFail(() => {throw new NotFoundError('Карточки с таким id не существует')})
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Id неверный'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }

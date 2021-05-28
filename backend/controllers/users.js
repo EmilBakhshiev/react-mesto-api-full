@@ -19,13 +19,11 @@ const getUsers = (req, res, next) => {
 
 const getMyUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new Error('Нет пользователя с таким id'))
+    .orFail(() => {throw new NotFoundError('Пользователя с таким id не существует')})
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Id не верный'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }
@@ -34,13 +32,11 @@ const getMyUser = (req, res, next) => {
 
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
-    .orFail(new Error('Нет пользователя с таким id'))
+    .orFail(() => {throw new NotFoundError('Пользователя с таким id не существует')})
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Id не верный'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }
@@ -94,13 +90,11 @@ const updateProfile = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new Error('Нет пользователя с таким Id'))
+    .orFail(() => {throw new NotFoundError('Пользователя с таким id не существует')})
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new ValidationError('Введенные данные некорректны'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }
@@ -120,13 +114,11 @@ const updateAvatar = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new Error('Нет пользователя с таким id'))
+    .orFail(() => {throw new NotFoundError('Пользователя с таким id не существует')})
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new ValidationError(err.message));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError(err.message));
       } else {
         next(err);
       }

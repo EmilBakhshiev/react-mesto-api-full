@@ -41,13 +41,11 @@ app.get('/crash-test', () => {
 app.post('/signup', validateSignUp, createUser);
 app.post('/signin', validateSignIn, login);
 
-app.use(auth);
+app.use('/users', auth, userRouter);
+app.use('/cards', auth, cardRouter);
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
-
-app.all('*', () => {
-  throw new NotFoundError('Такой страницы не существует');
+app.all('*', () => 
+  {throw new NotFoundError('Такой страницы не существует');
 });
 
 app.use(errors());
