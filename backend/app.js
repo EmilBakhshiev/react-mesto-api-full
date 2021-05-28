@@ -44,8 +44,8 @@ app.post('/signin', validateSignIn, login);
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
 
-app.all('*', () => 
-  {throw new NotFoundError('Такой страницы не существует');
+app.all('*', () => {
+  throw new NotFoundError('Такой страницы не существует');
 });
 
 app.use(errors());
