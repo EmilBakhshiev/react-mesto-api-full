@@ -6,7 +6,6 @@ const app = express();
 
 const dotenv = require('dotenv');
 const { errors } = require('celebrate');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
@@ -28,7 +27,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(cors());
 
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
